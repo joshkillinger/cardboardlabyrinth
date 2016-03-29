@@ -13,8 +13,8 @@ public class Room
 
     public bool Entrance = false;
     public bool Exit = false;
-    public float X = 0f;
-    public float Y = 0f;
+    public int X = 0;
+    public int Y = 0;
 
     public enum Direction
     {
@@ -24,7 +24,7 @@ public class Room
         West = 3
     }
 
-    public Room(float x, float y)
+    public Room(int x, int y)
     {
         X = x;
         Y = y;
@@ -32,15 +32,18 @@ public class Room
 
     public Room(Room parent, Direction direction)
     {
-        if (direction == Room.Direction.North)
+        X = parent.X;
+        Y = parent.Y;
+
+        if (direction == Direction.North)
         {
             Y = parent.Y + 1;
         }
-        else if (direction == Room.Direction.South)
+        else if (direction == Direction.South)
         {
             Y = parent.Y - 1;
         }
-        else if (direction == Room.Direction.East)
+        else if (direction == Direction.East)
         {
             X = parent.X + 1;
         }
@@ -51,6 +54,8 @@ public class Room
 
         parent.Add(this, direction);
         neighbors[(int)ReverseDirection(direction)] = parent;
+
+        Debug.Log("Added new room to the " + direction + " at " + X + ", " + Y);
     }
 
     /// <summary>

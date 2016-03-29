@@ -98,6 +98,8 @@ public class MazeGenerator : MonoBehaviour
         else if (direction == Room.Direction.West)
             x -= 1;
 
+        Debug.Log("Checking for room at " + x + ", " + y);
+
         for (int i = 0; i < maze.Count; i++)
         {
             if ((maze[i].X == x) && (maze[i].Y == y))
