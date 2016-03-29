@@ -3,25 +3,35 @@ using System.Collections.Generic;
 
 public class MazeGenerator : MonoBehaviour
 {
-    public int MaxRooms = 10;
+    public int MinRooms = 8;
+    public int MaxRooms = 12;
     public float BranchOdds = .2f;
 
     public GameObject RoomPrefab;
     public GameObject LinePrefab;
 
-    public List<Room> maze;// = new List<Room>();
+    public List<Room> Maze;
+
+    public int MinX, MinY, MaxX, MaxY;
 
     // Use this for initialization
     void Start()
     {
+        Room.MinX = MinX;
+        Room.MinY = MinY;
+        Room.MaxX = MaxX;
+        Room.MaxY = MaxY;
 
         Room start = new Room(0, 0);
         start.Entrance = true;
-        maze.Add(start);
+        Maze.Add(start);
 
-        CreateRoom(start);
+        while (Maze.Count < MinRooms)
+        {
+            CreateRoom(Maze[Random.Range(0, Maze.Count)]);
+        }
 
-        Debug.Log("Number of rooms generated: " + maze.Count);
+        Debug.Log("Number of rooms generated: " + Maze.Count);
 
         Spawn();
     }
@@ -32,12 +42,6 @@ public class MazeGenerator : MonoBehaviour
     /// <param name="parent">Room to spawn from</param>
     void CreateRoom(Room parent)
     {
-        if (maze.Count == MaxRooms)
-        {
-            //Debug.Log("Max rooms generated, returning");
-            return;
-        }
-
         Room.Direction[] directions = parent.AvailableDirections();
         if (directions.Length == 0)
         {
@@ -49,14 +53,17 @@ public class MazeGenerator : MonoBehaviour
         Room r = RoomExists(parent.X, parent.Y, directions[direction]);
         if (r != null)
         {
-            Debug.Log("Adding connection " + directions[direction] + " of " + parent.X + ", " + parent.Y);
+            //Debug.Log("Adding connection " + directions[direction] + " of " + parent.X + ", " + parent.Y);
             parent.Add(r, directions[direction]);
             r.Add(parent, Room.ReverseDirection(directions[direction]));
         }
         else
         {
-            Debug.Log("Adding Room " + directions[direction] + " of " + parent.X + ", " + parent.Y);
-            AddRoom(parent, directions[direction]);
+            if (Maze.Count < MaxRooms)
+            {
+                //Debug.Log("Adding Room " + directions[direction] + " of " + parent.X + ", " + parent.Y);
+                AddRoom(parent, directions[direction]);
+            }
         }
     }
 
@@ -68,7 +75,7 @@ public class MazeGenerator : MonoBehaviour
     void AddRoom(Room parent, Room.Direction direction)
     {
         Room r = new Room(parent, direction);
-        maze.Add(r);
+        Maze.Add(r);
 
         int i = 0;
         while (i < 4)
@@ -98,13 +105,13 @@ public class MazeGenerator : MonoBehaviour
         else if (direction == Room.Direction.West)
             x -= 1;
 
-        Debug.Log("Checking for room at " + x + ", " + y);
+        //Debug.Log("Checking for room at " + x + ", " + y);
 
-        for (int i = 0; i < maze.Count; i++)
+        for (int i = 0; i < Maze.Count; i++)
         {
-            if ((maze[i].X == x) && (maze[i].Y == y))
+            if ((Maze[i].X == x) && (Maze[i].Y == y))
             {
-                r = maze[i];
+                r = Maze[i];
                 break;
             }
         }
@@ -114,11 +121,11 @@ public class MazeGenerator : MonoBehaviour
 
     void Spawn()
     {
-        foreach (Room r in maze)
+        foreach (Room r in Maze)
         {
             
             Vector3 pos = new Vector3(r.X * 10, 0, r.Y * 10);
-            Debug.Log("Instantiating room at " + pos); 
+            //Debug.Log("Instantiating room at " + pos); 
             GameObject g = GameObject.Instantiate(RoomPrefab, pos, Quaternion.identity) as GameObject;
             for (int i = 0; i < 4; i ++)
             {

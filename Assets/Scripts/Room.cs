@@ -16,6 +16,8 @@ public class Room
     public int X = 0;
     public int Y = 0;
 
+    public static int MinX, MinY, MaxX, MaxY;
+
     public enum Direction
     {
         North = 0,
@@ -55,7 +57,7 @@ public class Room
         parent.Add(this, direction);
         neighbors[(int)ReverseDirection(direction)] = parent;
 
-        Debug.Log("Added new room to the " + direction + " at " + X + ", " + Y);
+        //Debug.Log("Added new room to the " + direction + " at " + X + ", " + Y);
     }
 
     /// <summary>
@@ -66,23 +68,28 @@ public class Room
     {
         List<Direction> directions = new List<Direction>();
 
-        if (neighbors[(int)Direction.North] == null)
+        if (Y < MaxY)
         {
-            directions.Add(Direction.North);
+            if (neighbors[(int)Direction.North] == null)
+            {
+                directions.Add(Direction.North);
+            }
         }
-        if (Y > 0)
+        if (Y > MinY)
         {
             if (neighbors[(int)Direction.South] == null)
             {
                 directions.Add(Direction.South);
             }
-            
         }
-        if (neighbors[(int)Direction.East] == null)
+        if (X < MaxX)
         {
-            directions.Add(Direction.East);
+            if (neighbors[(int)Direction.East] == null)
+            {
+                directions.Add(Direction.East);
+            }
         }
-        if (X > 0)
+        if (X > MinX)
         {
             if (neighbors[(int)Direction.West] == null)
             {
