@@ -34,7 +34,7 @@ public class MazeGenerator : MonoBehaviour
     {
         if (maze.Count == MaxRooms)
         {
-            Debug.Log("Max rooms generated, returning");
+            //Debug.Log("Max rooms generated, returning");
             return;
         }
 
@@ -49,13 +49,13 @@ public class MazeGenerator : MonoBehaviour
         Room r = RoomExists(parent.X, parent.Y, directions[direction]);
         if (r != null)
         {
-            Debug.Log("Adding connection");
+            Debug.Log("Adding connection " + directions[direction] + " of " + parent.X + ", " + parent.Y);
             parent.Add(r, directions[direction]);
             r.Add(parent, Room.ReverseDirection(directions[direction]));
         }
         else
         {
-            Debug.Log("Adding Room");
+            Debug.Log("Adding Room " + directions[direction] + " of " + parent.X + ", " + parent.Y);
             AddRoom(parent, directions[direction]);
         }
     }
@@ -125,7 +125,8 @@ public class MazeGenerator : MonoBehaviour
                     GameObject l = GameObject.Instantiate<GameObject>(LinePrefab);
                     LineRenderer lr = l.GetComponent<LineRenderer>();
                     lr.SetPosition(1, Room.DirectionToVector3((Room.Direction)i)* 10);
-                    l.transform.SetParent(g);
+                    l.transform.SetParent(g.transform);
+                    l.transform.localPosition = new Vector3(0, 0, 0);
                 }
             }
         }
