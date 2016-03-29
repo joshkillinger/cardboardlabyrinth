@@ -7,12 +7,15 @@ public class MazeGenerator : MonoBehaviour
     public int MaxRooms = 12;
     public float BranchOdds = .2f;
 
+    public GameObject RoomDebugPrefab;
+    public GameObject LineDebugPrefab;
     public GameObject RoomPrefab;
-    public GameObject LinePrefab;
 
     public List<Room> Maze;
 
     public int MinX, MinY, MaxX, MaxY;
+
+    public bool DebugOn = false;
 
     // Use this for initialization
     void Start()
@@ -125,18 +128,28 @@ public class MazeGenerator : MonoBehaviour
         {
             
             Vector3 pos = new Vector3(r.X * 10, 0, r.Y * 10);
-            //Debug.Log("Instantiating room at " + pos); 
-            GameObject g = GameObject.Instantiate(RoomPrefab, pos, Quaternion.identity) as GameObject;
-            for (int i = 0; i < 4; i ++)
+
+            if (DebugOn)
             {
-                if (r.Neighbors[i] != null)
+                GameObject g = GameObject.Instantiate(RoomDebugPrefab, pos, Quaternion.identity) as GameObject;
+                for (int i = 0; i < 4; i++)
                 {
-                    GameObject l = GameObject.Instantiate<GameObject>(LinePrefab);
-                    LineRenderer lr = l.GetComponent<LineRenderer>();
-                    lr.SetPosition(1, Room.DirectionToVector3((Room.Direction)i)* 10);
-                    l.transform.SetParent(g.transform);
-                    l.transform.localPosition = new Vector3(0, 0, 0);
+                    if (r.Neighbors[i] != null)
+                    {
+                        GameObject l = GameObject.Instantiate<GameObject>(LineDebugPrefab);
+                        LineRenderer lr = l.GetComponent<LineRenderer>();
+                        lr.SetPosition(1, Room.DirectionToVector3((Room.Direction)i) * 10);
+                        l.transform.SetParent(g.transform);
+                        l.transform.localPosition = new Vector3(0, 0, 0);
+                    }
                 }
+            }
+            else
+            {
+                GameObject g = GameObject.Instantiate(RoomPrefab, pos, Quaternion.identity) as GameObject;
+                RoomBuilder builder = g.GetComponent<RoomBuilder>();
+                builder.RoomSetup = r;
+                builder.Construct();
             }
         }
     }
