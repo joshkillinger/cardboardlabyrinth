@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+//only uncomment if needed for debugging, causes serialization overflow in editor (not critical, only annoying)
 [System.Serializable]
 public class Room
 {
+    [System.NonSerialized]
     private Room[] neighbors = { null, null, null, null };
     public Room[] Neighbors
     {
@@ -26,12 +28,20 @@ public class Room
         West = 3
     }
 
+    /// <summary>
+    /// Instantiates a Room object at the specified location
+    /// </summary>
     public Room(int x, int y)
     {
         X = x;
         Y = y;
     }
 
+    /// <summary>
+    /// Instantiates a Room object with a connection to the parent. Creates connections in both Rooms.
+    /// </summary>
+    /// <param name="parent">Room that spawned this Room</param>
+    /// <param name="direction">Direction from <paramref name="parent"/> to spawn this Room.</param>
     public Room(Room parent, Direction direction)
     {
         X = parent.X;
