@@ -15,6 +15,6 @@ public class FloorUIScript : MonoBehaviour
 
     public void Respawn()
     {
-        SceneManager.LoadScene("maze");
+        SceneManager.LoadScene("generation");
     }
 }

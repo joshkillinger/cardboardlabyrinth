@@ -1,4 +1,8 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using System.Collections;
 using System.Collections.Generic;
 
 public class MazeGenerator : MonoBehaviour
@@ -15,7 +19,12 @@ public class MazeGenerator : MonoBehaviour
 
     public int MinX, MinY, MaxX, MaxY;
 
+    public Text StatusText;
+    public GameObject[] DestroyOnLoad;
+
     public bool DebugOn = false;
+
+    private GameObject canvas;
 
     // Use this for initialization
     void Start()
@@ -25,47 +34,59 @@ public class MazeGenerator : MonoBehaviour
         Room.MaxX = MaxX;
         Room.MaxY = MaxY;
 
+        canvas = GameObject.Find("Canvas");
+
+        StartCoroutine(GenerateMaze());
+    }
+
+    IEnumerator GenerateMaze()
+    {
         Room start = new Room(0, 0);
         start.Entrance = true;
         Maze.Add(start);
 
         while (Maze.Count < MinRooms)
         {
-            CreateRoom(Maze[Random.Range(0, Maze.Count)]);
+            yield return CreateRoom(Maze[Random.Range(0, Maze.Count)]);
         }
 
         Debug.Log("Number of rooms generated: " + Maze.Count);
 
-        Spawn();
+        StatusText.text = "Building Rooms";
+        ExecuteEvents.Execute<IProgressUpdate>(canvas, null, (x, y) => x.UpdateProgress(0f));
+
+        yield return Spawn();
     }
 
     /// <summary>
     /// Creates a new room or connection to an existing room
     /// </summary>
     /// <param name="parent">Room to spawn from</param>
-    void CreateRoom(Room parent)
+    IEnumerator CreateRoom(Room parent)
     {
         Room.Direction[] directions = parent.AvailableDirections();
         if (directions.Length == 0)
         {
-            return;
-        }
-
-        int direction = Random.Range(0, directions.Length);
-
-        Room r = RoomExists(parent.X, parent.Y, directions[direction]);
-        if (r != null)
-        {
-            //Debug.Log("Adding connection " + directions[direction] + " of " + parent.X + ", " + parent.Y);
-            parent.Add(r, directions[direction]);
-            r.Add(parent, Room.ReverseDirection(directions[direction]));
+            yield return null;
         }
         else
         {
-            if (Maze.Count < MaxRooms)
+            int direction = Random.Range(0, directions.Length);
+
+            Room r = RoomExists(parent.X, parent.Y, directions[direction]);
+            if (r != null)
             {
-                //Debug.Log("Adding Room " + directions[direction] + " of " + parent.X + ", " + parent.Y);
-                AddRoom(parent, directions[direction]);
+                //Debug.Log("Adding connection " + directions[direction] + " of " + parent.X + ", " + parent.Y);
+                parent.Add(r, directions[direction]);
+                r.Add(parent, Room.ReverseDirection(directions[direction]));
+            }
+            else
+            {
+                if (Maze.Count < MaxRooms)
+                {
+                    //Debug.Log("Adding Room " + directions[direction] + " of " + parent.X + ", " + parent.Y);
+                    yield return AddRoom(parent, directions[direction]);
+                }
             }
         }
     }
@@ -75,16 +96,18 @@ public class MazeGenerator : MonoBehaviour
     /// </summary>
     /// <param name="parent">Room that spawned this room</param>
     /// <param name="direction">Direction from <paramref name="parent"/></param>
-    void AddRoom(Room parent, Room.Direction direction)
+    IEnumerator AddRoom(Room parent, Room.Direction direction)
     {
         Room r = new Room(parent, direction);
         Maze.Add(r);
+
+        ExecuteEvents.Execute<IProgressUpdate>(canvas, null, (x, y) => x.UpdateProgress((float)Maze.Count / (float)MaxRooms));
 
         int i = 0;
         while (i < 4)
         {
             if (Random.Range(0f, 1f) < BranchOdds)
-                CreateRoom(r);
+                yield return CreateRoom(r);
             i++;
         }
     }
@@ -122,23 +145,24 @@ public class MazeGenerator : MonoBehaviour
         return r;
     }
 
-    void Spawn()
+    IEnumerator Spawn()
     {
-        foreach (Room r in Maze)
+        for (int i = 0; i < Maze.Count; i++)
         {
-            
+            Room r = Maze[i];
+
             Vector3 pos = new Vector3(r.X * 10, 0, r.Y * 10);
 
             if (DebugOn)
             {
                 GameObject g = GameObject.Instantiate(RoomDebugPrefab, pos, Quaternion.identity) as GameObject;
-                for (int i = 0; i < 4; i++)
+                for (int j = 0; j < 4; j++)
                 {
-                    if (r.Neighbors[i] != null)
+                    if (r.Neighbors[j] != null)
                     {
                         GameObject l = GameObject.Instantiate<GameObject>(LineDebugPrefab);
                         LineRenderer lr = l.GetComponent<LineRenderer>();
-                        lr.SetPosition(1, Room.DirectionToVector3((Room.Direction)i) * 10);
+                        lr.SetPosition(1, Room.DirectionToVector3((Room.Direction)j) * 10);
                         l.transform.SetParent(g.transform);
                         l.transform.localPosition = new Vector3(0, 0, 0);
                     }
@@ -151,6 +175,24 @@ public class MazeGenerator : MonoBehaviour
                 builder.RoomSetup = r;
                 builder.Construct();
             }
+
+            ExecuteEvents.Execute<IProgressUpdate>(canvas, null, (x, y) => x.UpdateProgress((float)i / (float)Maze.Count));
+            yield return null;
+        }
+
+        LoadScene();
+    }
+
+    /// <summary>
+    /// Additively loads the maze scene and destroys the list of unnecessary objects
+    /// </summary>
+    private void LoadScene()
+    {
+        SceneManager.LoadScene("maze", LoadSceneMode.Additive);
+
+        foreach (GameObject g in DestroyOnLoad)
+        {
+            GameObject.Destroy(g);
         }
     }
 }

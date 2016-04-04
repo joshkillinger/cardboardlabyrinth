@@ -7,10 +7,20 @@ public class NavPoint : MonoBehaviour
 
     PlayerNavigation player;
 
-    // Use this for initialization
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerNavigation>();
+        StartCoroutine(FindPlayer());
+    }
+
+    IEnumerator FindPlayer()
+    {
+        while (player == null)
+        {
+            GameObject g = GameObject.FindGameObjectWithTag("Player");
+            if (g != null)
+                player = g.GetComponent<PlayerNavigation>();
+            yield return new WaitForSeconds(0.1f);
+        }
     }
 
     public void Triggered()
