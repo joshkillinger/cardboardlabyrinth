@@ -15,7 +15,7 @@ public class RoomBuilder : MonoBehaviour
     {
         for (int i = 0; i < 4; i++)
         {
-            if (RoomSetup.Neighbors[i] == null)
+            if (RoomSetup.Neighbors[i] < 0)
             {
                 GameObject wall = GameObject.Instantiate<GameObject>(WallPrefabs[Random.Range(0, WallPrefabs.Length)]);
                 wall.transform.SetParent(Walls[i], false);

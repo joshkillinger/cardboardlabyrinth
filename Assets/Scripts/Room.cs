@@ -1,13 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-//only uncomment if needed for debugging, causes serialization overflow in editor (not critical, only annoying)
 [System.Serializable]
 public class Room
 {
     [System.NonSerialized]
-    private Room[] neighbors = { null, null, null, null };
-    public Room[] Neighbors
+    private int[] neighbors = { -1, -1, -1, -1 };
+    public int[] Neighbors
     {
         get { return neighbors; }
         set { }
@@ -19,6 +18,14 @@ public class Room
     public int Y = 0;
 
     public static int MinX, MinY, MaxX, MaxY;
+    public static MazeGenerator Generator;
+    
+    private int index;
+    public int Index
+    {
+        get { return index; }
+        set {}
+    }
 
     public enum Direction
     {
@@ -28,13 +35,15 @@ public class Room
         West = 3
     }
 
+    
     /// <summary>
     /// Instantiates a Room object at the specified location
     /// </summary>
-    public Room(int x, int y)
+    public Room(int x, int y, int index)
     {
         X = x;
         Y = y;
+        this.index = index;
     }
 
     /// <summary>
@@ -42,10 +51,12 @@ public class Room
     /// </summary>
     /// <param name="parent">Room that spawned this Room</param>
     /// <param name="direction">Direction from <paramref name="parent"/> to spawn this Room.</param>
-    public Room(Room parent, Direction direction)
+    public Room(Room parent, Direction direction, int index)
     {
         X = parent.X;
         Y = parent.Y;
+        
+        this.index = index;
 
         if (direction == Direction.North)
         {
@@ -65,7 +76,7 @@ public class Room
         }
 
         parent.Add(this, direction);
-        neighbors[(int)ReverseDirection(direction)] = parent;
+        neighbors[(int)ReverseDirection(direction)] = parent.Index;
 
         //Debug.Log("Added new room to the " + direction + " at " + X + ", " + Y);
     }
@@ -80,28 +91,28 @@ public class Room
 
         if (Y < MaxY)
         {
-            if (neighbors[(int)Direction.North] == null)
+            if (neighbors[(int)Direction.North] < 0)
             {
                 directions.Add(Direction.North);
             }
         }
         if (Y > MinY)
         {
-            if (neighbors[(int)Direction.South] == null)
+            if (neighbors[(int)Direction.South] < 0)
             {
                 directions.Add(Direction.South);
             }
         }
         if (X < MaxX)
         {
-            if (neighbors[(int)Direction.East] == null)
+            if (neighbors[(int)Direction.East] < 0)
             {
                 directions.Add(Direction.East);
             }
         }
         if (X > MinX)
         {
-            if (neighbors[(int)Direction.West] == null)
+            if (neighbors[(int)Direction.West] < 0)
             {
                 directions.Add(Direction.West);
             }
@@ -117,7 +128,7 @@ public class Room
     /// <param name="direction">Direction to add room</param>
     public void Add(Room other, Direction direction)
     {
-        neighbors[(int)direction] = other;
+        neighbors[(int)direction] = other.Index;
     }
 
     /// <summary>

@@ -33,6 +33,7 @@ public class MazeGenerator : MonoBehaviour
         Room.MinY = MinY;
         Room.MaxX = MaxX;
         Room.MaxY = MaxY;
+        Room.Generator = this;
 
         canvas = GameObject.Find("Canvas");
 
@@ -41,7 +42,7 @@ public class MazeGenerator : MonoBehaviour
 
     IEnumerator GenerateMaze()
     {
-        Room start = new Room(0, 0);
+        Room start = new Room(0, 0, 0);
         start.Entrance = true;
         Maze.Add(start);
 
@@ -98,9 +99,10 @@ public class MazeGenerator : MonoBehaviour
     /// <param name="direction">Direction from <paramref name="parent"/></param>
     IEnumerator AddRoom(Room parent, Room.Direction direction)
     {
-        Room r = new Room(parent, direction);
+        Room r = new Room(parent, direction, Maze.Count);
         Maze.Add(r);
 
+        //update the UI
         ExecuteEvents.Execute<IProgressUpdate>(canvas, null, (x, y) => x.UpdateProgress((float)Maze.Count / (float)MaxRooms));
 
         int i = 0;
