@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 public class PlayerNavigation : MonoBehaviour
@@ -19,6 +20,8 @@ public class PlayerNavigation : MonoBehaviour
     {
         destination = new Vector3();
         startMoveTime = Time.time;
+
+        SceneManager.SetActiveScene(SceneManager.GetSceneByName("maze"));
     }
 
     // Update is called once per frame

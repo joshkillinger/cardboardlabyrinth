@@ -24,7 +24,9 @@ public class MazeGenerator : MonoBehaviour
 
     public bool DebugOn = false;
 
-    private GameObject canvas;
+    private GameObject slider;
+
+    private Queue<int> bfsQueue;
 
     // Use this for initialization
     void Start()
@@ -35,7 +37,7 @@ public class MazeGenerator : MonoBehaviour
         Room.MaxY = MaxY;
         Room.Generator = this;
 
-        canvas = GameObject.Find("Canvas");
+        slider = GameObject.Find("ProgressSlider");
 
         StartCoroutine(GenerateMaze());
     }
@@ -51,10 +53,15 @@ public class MazeGenerator : MonoBehaviour
             yield return CreateRoom(Maze[Random.Range(0, Maze.Count)]);
         }
 
-        Debug.Log("Number of rooms generated: " + Maze.Count);
+        if (DebugOn)
+        {
+            Debug.Log("Number of rooms generated: " + Maze.Count);
+        }
 
-        StatusText.text = "Building Rooms";
-        ExecuteEvents.Execute<IProgressUpdate>(canvas, null, (x, y) => x.UpdateProgress(0f));
+
+        yield return FindExit();
+
+        Progress("Building Rooms", 0f);
 
         yield return Spawn();
     }
@@ -77,7 +84,6 @@ public class MazeGenerator : MonoBehaviour
             Room r = RoomExists(parent.X, parent.Y, directions[direction]);
             if (r != null)
             {
-                //Debug.Log("Adding connection " + directions[direction] + " of " + parent.X + ", " + parent.Y);
                 parent.Add(r, directions[direction]);
                 r.Add(parent, Room.ReverseDirection(directions[direction]));
             }
@@ -85,7 +91,6 @@ public class MazeGenerator : MonoBehaviour
             {
                 if (Maze.Count < MaxRooms)
                 {
-                    //Debug.Log("Adding Room " + directions[direction] + " of " + parent.X + ", " + parent.Y);
                     yield return AddRoom(parent, directions[direction]);
                 }
             }
@@ -103,7 +108,8 @@ public class MazeGenerator : MonoBehaviour
         Maze.Add(r);
 
         //update the UI
-        ExecuteEvents.Execute<IProgressUpdate>(canvas, null, (x, y) => x.UpdateProgress((float)Maze.Count / (float)MaxRooms));
+        float progress = (float)Maze.Count / (float)MaxRooms;
+        Progress("", progress / 2);
 
         int i = 0;
         while (i < 4)
@@ -147,6 +153,64 @@ public class MazeGenerator : MonoBehaviour
         return r;
     }
 
+    /// <summary>
+    /// Uses BFS to find the room farthest from the entrance, and marks it as the exit.
+    /// </summary>
+    IEnumerator FindExit()
+    {
+        foreach (Room r in Maze)
+        {
+            r.Distance = int.MaxValue;
+            r.Visited = false;
+        }
+
+        float count = 0f;
+
+        bfsQueue = new Queue<int>();
+        bfsQueue.Enqueue(0);
+        Maze[0].Distance = 0;
+
+        while (bfsQueue.Count > 0)
+        {
+            int r = bfsQueue.Dequeue();
+            Maze[r].Visited = true;
+
+            foreach (int child in Maze[r].Neighbors)
+            {
+                if (child < 0)
+                    continue;
+                if (Maze[child].Visited)
+                    continue;
+                if (bfsQueue.Contains(child))
+                    continue;
+
+                Maze[child].Distance = Maze[r].Distance + 1;
+                bfsQueue.Enqueue(child);
+            }
+
+            count += 1;
+            float progress = (count / Maze.Count) / 2;
+            Progress("", .5f + progress);
+
+            yield return null;
+        }
+
+        int maxDistance = 0;
+        int farthestRoom = 0;
+        foreach(Room r in Maze)
+        {
+            if (r.Distance > maxDistance)
+            {
+                maxDistance = r.Distance;
+                farthestRoom = r.Index;
+            }
+        }
+        Maze[farthestRoom].Exit = true;
+    }
+
+    /// <summary>
+    /// Instantiates the rooms in the maze based on piecemeal prefabs
+    /// </summary>
     IEnumerator Spawn()
     {
         for (int i = 0; i < Maze.Count; i++)
@@ -160,7 +224,7 @@ public class MazeGenerator : MonoBehaviour
                 GameObject g = GameObject.Instantiate(RoomDebugPrefab, pos, Quaternion.identity) as GameObject;
                 for (int j = 0; j < 4; j++)
                 {
-                    if (r.Neighbors[j] != null)
+                    if (r.Neighbors[j] >= 0)
                     {
                         GameObject l = GameObject.Instantiate<GameObject>(LineDebugPrefab);
                         LineRenderer lr = l.GetComponent<LineRenderer>();
@@ -178,7 +242,7 @@ public class MazeGenerator : MonoBehaviour
                 builder.Construct();
             }
 
-            ExecuteEvents.Execute<IProgressUpdate>(canvas, null, (x, y) => x.UpdateProgress((float)i / (float)Maze.Count));
+            Progress("", (float)i / (float)Maze.Count);
             yield return null;
         }
 
@@ -197,4 +261,17 @@ public class MazeGenerator : MonoBehaviour
             GameObject.Destroy(g);
         }
     }
+
+    private void Progress(string text, float progress)
+    {
+        if (text.Length > 0)
+        {
+            StatusText.text = text;
+        }
+
+        Debug.Log("Updating progress bar to " + progress);
+        ExecuteEvents.Execute<IProgressUpdate>(slider, null, (x, y) => x.UpdateProgress(progress));
+    }
+
+
 }

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 [System.Serializable]
 public class Room
 {
-    [System.NonSerialized]
     private int[] neighbors = { -1, -1, -1, -1 };
     public int[] Neighbors
     {
@@ -35,6 +34,8 @@ public class Room
         West = 3
     }
 
+    public int Distance = int.MaxValue;
+    public bool Visited = false;
     
     /// <summary>
     /// Instantiates a Room object at the specified location

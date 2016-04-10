@@ -16,5 +16,6 @@ public class ProgressUpdate : MonoBehaviour, IProgressUpdate
     public void UpdateProgress(float progress)
     {
         progressSlider.value = progress;
+        Debug.Log("Progress slider now updated to " + progress);
     }
 }
