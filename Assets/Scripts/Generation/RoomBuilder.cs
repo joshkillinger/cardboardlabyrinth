@@ -10,6 +10,7 @@ public class RoomBuilder : MonoBehaviour
 
     public GameObject[] WallPrefabs;
     public GameObject[] CornerPrefabs;
+    public GameObject ExitPrefab;
 
     public void Construct()
     {
@@ -23,6 +24,12 @@ public class RoomBuilder : MonoBehaviour
 
             GameObject corner = GameObject.Instantiate<GameObject>(CornerPrefabs[Random.Range(0, CornerPrefabs.Length)]);
             corner.transform.SetParent(Corners[i], false);
+        }
+
+        if (RoomSetup.Exit)
+        {
+            GameObject exit = GameObject.Instantiate<GameObject>(ExitPrefab);
+            exit.transform.SetParent(transform, false);
         }
     }
 }

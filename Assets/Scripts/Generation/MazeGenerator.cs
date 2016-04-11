@@ -158,10 +158,23 @@ public class MazeGenerator : MonoBehaviour
     /// </summary>
     IEnumerator FindExit()
     {
+        int minX = Maze[0].X;
+        int minY = Maze[0].Y;
+        int maxX = Maze[0].X;
+        int maxY = Maze[0].Y;
+
         foreach (Room r in Maze)
         {
             r.Distance = int.MaxValue;
             r.Visited = false;
+            if (r.X < minX)
+                minX = r.X;
+            if (r.Y < minY)
+                minY = r.Y;
+            if (r.X > maxX)
+                maxX = r.X;
+            if (r.Y > maxY)
+                maxY = r.Y;
         }
 
         float count = 0f;
@@ -197,15 +210,21 @@ public class MazeGenerator : MonoBehaviour
 
         int maxDistance = 0;
         int farthestRoom = 0;
-        foreach(Room r in Maze)
+        foreach (Room r in Maze)
         {
-            if (r.Distance > maxDistance)
+            if ((r.X == minX) || (r.X == maxX) || (r.Y == minY) || (r.Y == maxY))
             {
-                maxDistance = r.Distance;
-                farthestRoom = r.Index;
+                if (r.Distance > maxDistance)
+                {
+                    maxDistance = r.Distance;
+                    farthestRoom = r.Index;
+                }
             }
         }
         Maze[farthestRoom].Exit = true;
+//#if UNITY_EDITOR
+//        UnityEditor.EditorApplication.isPaused = true;
+//#endif
     }
 
     /// <summary>
