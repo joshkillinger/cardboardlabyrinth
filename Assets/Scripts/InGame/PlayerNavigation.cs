@@ -24,6 +24,8 @@ public class PlayerNavigation : MonoBehaviour
 
     private bool done = false;
 
+    private Score scoreBin;
+
     // Use this for initialization
     void Start()
     {
@@ -35,6 +37,8 @@ public class PlayerNavigation : MonoBehaviour
         Scene maze = SceneManager.GetSceneByName("maze");
         SceneManager.SetActiveScene(maze);
         SceneManager.MergeScenes(gen, maze);
+
+        scoreBin = GameObject.Find("ScoreBin").GetComponent<Score>();
     }
 
     // Update is called once per frame
@@ -90,14 +94,15 @@ public class PlayerNavigation : MonoBehaviour
     /// </summary>
     public void ReachedExit()
     {
-        float duration = Time.time - startTime;
-        StartCoroutine(EndLevel(duration));
+        scoreBin.Time = Time.time - startTime;
+
+        StartCoroutine(EndLevel());
     }
 
     /// <summary>
     /// Fades the screen to black and ends the level
     /// </summary>
-    private IEnumerator EndLevel(float completedTime)
+    private IEnumerator EndLevel()
     {
         float start = Time.time;
         while ((Time.time - start) < FadeTime)
@@ -112,5 +117,7 @@ public class PlayerNavigation : MonoBehaviour
             }
             yield return null;
         }
+
+        SceneManager.LoadScene("score");
     }
 }

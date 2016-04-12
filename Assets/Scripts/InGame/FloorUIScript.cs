@@ -15,6 +15,8 @@ public class FloorUIScript : MonoBehaviour
 
     public void Respawn()
     {
+        GameObject.Destroy(GameObject.Find("ScoreBin"));
+
         SceneManager.LoadScene("generation");
     }
 }

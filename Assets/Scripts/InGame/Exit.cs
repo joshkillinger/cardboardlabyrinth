@@ -23,6 +23,7 @@ public class Exit : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
+        //GetComponent<ParticleSystem>().Stop();
         player.ReachedExit();
     }
 }

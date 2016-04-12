@@ -25,6 +25,7 @@ public class MazeGenerator : MonoBehaviour
     public bool DebugOn = false;
 
     private GameObject slider;
+    private Score scoreBin;
 
     private Queue<int> bfsQueue;
 
@@ -38,6 +39,7 @@ public class MazeGenerator : MonoBehaviour
         Room.Generator = this;
 
         slider = GameObject.Find("ProgressSlider");
+        scoreBin = GameObject.Find("ScoreBin").GetComponent<Score>();
 
         StartCoroutine(GenerateMaze());
     }
@@ -222,9 +224,13 @@ public class MazeGenerator : MonoBehaviour
             }
         }
         Maze[farthestRoom].Exit = true;
-//#if UNITY_EDITOR
-//        UnityEditor.EditorApplication.isPaused = true;
-//#endif
+
+        scoreBin.Rooms = Maze.Count;
+        scoreBin.Distance = Maze[farthestRoom].Distance;
+
+        //#if UNITY_EDITOR
+        //        UnityEditor.EditorApplication.isPaused = true;
+        //#endif
     }
 
     /// <summary>
