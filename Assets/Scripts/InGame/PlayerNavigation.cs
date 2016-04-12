@@ -15,6 +15,9 @@ public class PlayerNavigation : MonoBehaviour
     private float startMoveTime;
     private bool moving = false;
 
+    private float startTime;
+    private bool timing;
+
     // Use this for initialization
     void Start()
     {
@@ -37,6 +40,11 @@ public class PlayerNavigation : MonoBehaviour
     {
         destination = dest;
         moving = true;
+        if (!timing)
+        {
+            startTime = Time.time;
+            timing = true;
+        }
     }
 
     private void Move()
@@ -54,5 +62,11 @@ public class PlayerNavigation : MonoBehaviour
             direction.Normalize();
             gameObject.transform.Translate(direction * moveDist);
         }
+    }
+
+    public void ReachedExit()
+    {
+        float duration = Time.time - startTime;
+        Debug.Log("Maze finished, time = " + duration);
     }
 }

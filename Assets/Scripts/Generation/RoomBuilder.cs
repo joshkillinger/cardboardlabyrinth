@@ -30,6 +30,7 @@ public class RoomBuilder : MonoBehaviour
         {
             GameObject exit = GameObject.Instantiate<GameObject>(ExitPrefab);
             exit.transform.SetParent(transform, false);
+            //exit.GetComponentInChildren<NavPoint>().Exit = true;
         }
     }
 }
