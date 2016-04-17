@@ -29,8 +29,8 @@ public class Room
     public enum Direction
     {
         North = 0,
-        South = 1,
-        East = 2,
+        East = 1,
+        South = 2,
         West = 3
     }
 
@@ -137,7 +137,7 @@ public class Room
     /// </summary>
     public static Direction ReverseDirection(Direction d)
     {
-        int r = (int)d ^ 0x1;
+        int r = ((int)d + 2) % 4;
         return (Direction)r;
     }
 
