@@ -15,11 +15,15 @@ public class RoomBuilder : MonoBehaviour
     public GameObject[] CornerPrefabs1to0;
     public GameObject[] CornerPrefabs1to1;
     public GameObject ExitPrefab;
+    public GameObject[] DecoPrefabs;
+
+    public float DecoChance = .2f;
 
     public void Construct()
     {
         int[] wallThickness = { Random.Range(0, 2), Random.Range(0, 2), Random.Range(0, 2), Random.Range(0, 2) };
 
+        //build this room's walls and corners
         for (int i = 0; i < 4; i++)
         {
             //walls
@@ -57,10 +61,22 @@ public class RoomBuilder : MonoBehaviour
             corner.transform.SetParent(Corners[i], false);
         }
 
+        //check for exit
         if (RoomSetup.Exit)
         {
             GameObject exit = GameObject.Instantiate<GameObject>(ExitPrefab);
             exit.transform.SetParent(transform, false);
+        }
+
+        //maybe add some decoration
+        if (Random.Range(0.0f, 1.0f) < DecoChance)
+        {
+            float angle = 90 * Random.Range(0, 4);
+
+            GameObject deco = GameObject.Instantiate<GameObject>(DecoPrefabs[Random.Range(0, DecoPrefabs.Length)]);
+            deco.transform.SetParent(transform, false);
+
+            deco.transform.Rotate(Vector3.up, angle, Space.Self);
         }
     }
 }
