@@ -14,8 +14,9 @@ public class RoomBuilder : MonoBehaviour
     public GameObject[] CornerPrefabs0to1;
     public GameObject[] CornerPrefabs1to0;
     public GameObject[] CornerPrefabs1to1;
-    public GameObject ExitPrefab;
     public GameObject[] DecoPrefabs;
+    public GameObject ExitPrefab;
+    public GameObject Pillar4xPrefab;
 
     public float DecoChance = .2f;
 
@@ -66,10 +67,17 @@ public class RoomBuilder : MonoBehaviour
         {
             GameObject exit = GameObject.Instantiate<GameObject>(ExitPrefab);
             exit.transform.SetParent(transform, false);
-        }
 
+            GameObject pillars = GameObject.Instantiate<GameObject>(Pillar4xPrefab);
+            pillars.transform.SetParent(transform, false);
+        }
+        else if (RoomSetup.Entrance)
+        {
+            GameObject pillars = GameObject.Instantiate<GameObject>(Pillar4xPrefab);
+            pillars.transform.SetParent(transform, false);
+        }
         //maybe add some decoration
-        if (Random.Range(0.0f, 1.0f) < DecoChance)
+        else if (Random.Range(0.0f, 1.0f) < DecoChance)
         {
             float angle = 90 * Random.Range(0, 4);
 
